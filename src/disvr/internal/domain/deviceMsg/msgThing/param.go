@@ -3,10 +3,13 @@ package msgThing
 import (
 	"encoding/json"
 	"fmt"
+	"math"
+	"strings"
+
 	"github.com/i-Things/things/shared/domain/schema"
 	"github.com/i-Things/things/shared/errors"
+	"github.com/shopspring/decimal"
 	"github.com/spf13/cast"
-	"math"
 )
 
 const (
@@ -139,7 +142,11 @@ func GetVal(d *schema.Define, val any) (any, error) {
 			}
 			step := cast.ToFloat64(d.Step)
 			if step != 0 && !math.IsNaN(step) && !math.IsInf(step, 0) {
+				//处理步进
 				num = math.Floor(num/step) * step
+				//保留小数位
+				len :=len(strings.Split(d.Step, ".")[1])
+				num, _ = decimal.NewFromFloat(num).RoundFloor(int32(len)).Float64()
 			}
 			return num, nil
 		}
